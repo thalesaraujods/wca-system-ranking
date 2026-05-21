@@ -41,9 +41,9 @@ st.markdown(
         --color-brown-light:   #D4A055;   /* hover âmbar, destaques */
         --color-brown-subtle:  #F5EDE0;   /* fundo âmbar sutil */
 
-        --color-bg:            #F2EDE6;   /* fundo da página (creme) */
-        --color-surface:       #FDFAF6;   /* cards e tabelas */
-        --color-surface-alt:   #EDE8E0;   /* zebra, inputs */
+        --color-bg:            #F0EAE3;   /* fundo da página — creme da logo */
+        --color-surface:       #FAF5EF;   /* cards e tabelas */
+        --color-surface-alt:   #EAE3DA;   /* zebra, inputs */
         --color-border:        #D8D0C4;   /* divisórias */
         --color-border-strong: #C4BAB0;   /* bordas de input */
 
@@ -76,7 +76,14 @@ st.markdown(
     }
 
     /* ── Fundo da página ── */
-    .stApp { background-color: var(--color-bg) !important; }
+    .stApp,
+    .stApp > div,
+    [data-testid="stAppViewContainer"],
+    [data-testid="stAppViewBlockContainer"],
+    section[data-testid="stSidebar"],
+    .main .block-container {
+        background-color: var(--color-bg) !important;
+    }
 
     /* ── Header do circuito ── */
     .circuit-header { text-align: center; margin: 0.5rem 0 1rem; }
@@ -333,21 +340,17 @@ if not st.session_state.loaded:
 
         if not any_loaded:
             st.error(
-                "Não foi possível carregar os resultados. "
-                "Verifique sua conexão ou tente novamente mais tarde."
+                "Não foi possível conectar ao WCA Live. "
+                "Verifique sua conexão ou tente novamente."
             )
         else:
+            # Avança para a tela de resultados mesmo sem resultados publicados
             df = build_combined_dataframe(stages_data)
-            if df.empty:
-                st.warning(
-                    "As etapas foram encontradas, mas ainda não possuem resultados publicados."
-                )
-            else:
-                st.session_state.df = df
-                st.session_state.ranking = build_general_ranking(df)
-                st.session_state.stages_meta = stages_meta
-                st.session_state.loaded = True
-                st.rerun()
+            st.session_state.df = df
+            st.session_state.ranking = build_general_ranking(df)
+            st.session_state.stages_meta = stages_meta
+            st.session_state.loaded = True
+            st.rerun()
 
     # Info sobre etapas que serão carregadas
     st.markdown(
@@ -380,6 +383,15 @@ else:
         if st.button("Atualizar", type="secondary", key="btn_reload"):
             st.session_state.loaded = False
             st.rerun()
+
+    # Banner quando resultados ainda não foram publicados
+    if df is None or df.empty:
+        etapas_nomes = [v for v in stages_meta.values() if v]
+        st.info(
+            f"✅ Competições encontradas: **{' · '.join(etapas_nomes)}**\n\n"
+            "Os resultados ainda não foram publicados no WCA Live. "
+            "Clique em **Atualizar** quando a competição estiver em andamento."
+        )
 
     st.divider()
 

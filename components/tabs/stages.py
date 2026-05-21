@@ -5,27 +5,24 @@ from services.wca_api import CIRCUIT_COMPETITIONS
 
 
 def render_stages_tab(df: pd.DataFrame, stages_meta: dict) -> None:
-    """
-    Show competitors and scores broken down by circuit stage.
-    stages_meta: { stage_name: competition_name | None }
-    """
     if df.empty or "Etapa" not in df.columns:
         st.info("Nenhum dado de etapa disponível.")
         return
 
     stage_names = list(CIRCUIT_COMPETITIONS.keys())
 
-    # ── Seção 1: Cards de resumo por etapa ───────────────────────────────────
+    # ── Seção 1: Ranking por etapa ────────────────────────────────────────────
+    st.subheader("Ranking por Etapa")
     _render_stage_summary_cards(df, stage_names, stages_meta)
 
+    # ── Seção 2: Competidores de cada etapa ───────────────────────────────────
     st.divider()
-
-    # ── Seção 2: Competidores de cada etapa ──────────────────────────────────
+    st.subheader("Competidores por Etapa")
     _render_stage_competitors(df, stage_names)
 
+    # ── Seção 3: Participação no circuito ─────────────────────────────────────
     st.divider()
-
-    # ── Seção 3: Participação geral no circuito ───────────────────────────────
+    st.subheader("Participação no Circuito")
     _render_participation_summary(df, stage_names)
 
 
@@ -34,7 +31,6 @@ def render_stages_tab(df: pd.DataFrame, stages_meta: dict) -> None:
 def _render_stage_summary_cards(
     df: pd.DataFrame, stage_names: list, stages_meta: dict
 ) -> None:
-    """Side-by-side ranking cards — one per stage."""
     cols = st.columns(len(stage_names))
 
     for col, stage_name in zip(cols, stage_names):
@@ -45,22 +41,11 @@ def _render_stage_summary_cards(
             n_competitors = stage_df["Nome"].nunique() if not stage_df.empty else 0
             n_events = stage_df["Evento"].nunique() if not stage_df.empty else 0
 
-            st.markdown(
-                f"""
-                <div class="stage-card">
-                    <p class="stage-title">{stage_name}</p>
-                    <p class="tab-meta">{comp_name}</p>
-                    <p class="tab-meta">{n_competitors} competidores · {n_events} eventos</p>
-                </div>
-                """,
-                unsafe_allow_html=True,
-            )
+            st.markdown(f"**{stage_name}**")
+            st.caption(f"{comp_name} · {n_competitors} competidores · {n_events} eventos")
 
             if stage_df.empty:
-                st.markdown(
-                    '<p class="tab-meta">Resultados ainda não disponíveis.</p>',
-                    unsafe_allow_html=True,
-                )
+                st.info("Resultados ainda não disponíveis.")
                 continue
 
             ranking = build_stage_ranking(df, stage_name)
@@ -79,22 +64,12 @@ def _render_stage_summary_cards(
 
 
 def _render_stage_competitors(df: pd.DataFrame, stage_names: list) -> None:
-    """
-    Interactive section: choose a stage, see all competitors with
-    their event-by-event breakdown.
-    """
-    st.markdown(
-        '<p class="stage-title">Competidores por Etapa</p>',
-        unsafe_allow_html=True,
-    )
-
     # Seletor de etapa
     selected_stage = st.radio(
-        label="Selecione a etapa",
+        label="Etapa",
         options=stage_names,
         horizontal=True,
         key="radio_stage_competitors",
-        label_visibility="collapsed",
     )
 
     stage_df = df[df["Etapa"] == selected_stage]
@@ -106,19 +81,13 @@ def _render_stage_competitors(df: pd.DataFrame, stage_names: list) -> None:
     competitors = sorted(stage_df["Nome"].unique())
     n = len(competitors)
 
-    st.markdown(
-        f'<p class="tab-meta">{n} competidores inscrito(s) em {selected_stage}</p>',
-        unsafe_allow_html=True,
-    )
-
-    # Opção de filtrar por competidor
+    # Linha de controles: filtro + toggle
     col_search, col_toggle = st.columns([3, 1])
     with col_search:
         search = st.selectbox(
             label="Filtrar competidor",
             options=["Todos"] + competitors,
             key="selectbox_stage_competitor_filter",
-            label_visibility="collapsed",
         )
     with col_toggle:
         show_detail = st.toggle(
@@ -127,12 +96,13 @@ def _render_stage_competitors(df: pd.DataFrame, stage_names: list) -> None:
             key="toggle_stage_detail",
         )
 
-    # Filtra se selecionou um competidor específico
+    st.caption(f"{n} competidores em {selected_stage}")
+
+    # Filtra por competidor se selecionado
     if search != "Todos":
         stage_df = stage_df[stage_df["Nome"] == search]
 
     if show_detail:
-        # Visão detalhada: evento · rodada · posição · TC · pontos
         detail = (
             stage_df[["Nome", "Evento", "Rodada", "Posição", "TC", "Pontos"]]
             .sort_values(["Nome", "Evento", "Rodada"])
@@ -154,7 +124,6 @@ def _render_stage_competitors(df: pd.DataFrame, stage_names: list) -> None:
             },
         )
     else:
-        # Visão resumida: competidor · total de pontos na etapa
         summary = (
             stage_df.groupby("Nome")["Pontos"]
             .sum()
@@ -180,12 +149,6 @@ def _render_stage_competitors(df: pd.DataFrame, stage_names: list) -> None:
 
 
 def _render_participation_summary(df: pd.DataFrame, stage_names: list) -> None:
-    """Show which competitors participated in each stage."""
-    st.markdown(
-        '<p class="stage-title">Participação no Circuito</p>',
-        unsafe_allow_html=True,
-    )
-
     sets = {}
     for sn in stage_names:
         stage_df = df[df["Etapa"] == sn]
@@ -213,12 +176,9 @@ def _render_participation_summary(df: pd.DataFrame, stage_names: list) -> None:
     )
 
     both = summary_df[summary_df["Etapas"] == f"{len(stage_names)}/{len(stage_names)}"]
-    st.markdown(
-        f'<p class="tab-meta">'
-        f'{len(all_competitors)} competidores no total · '
-        f'<strong>{len(both)} em ambas as etapas</strong>'
-        f'</p>',
-        unsafe_allow_html=True,
+    st.caption(
+        f"{len(all_competitors)} competidores no total · "
+        f"**{len(both)}** em ambas as etapas"
     )
 
     col_config = {

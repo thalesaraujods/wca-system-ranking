@@ -1,14 +1,17 @@
 import streamlit as st
+from PIL import Image
 from pathlib import Path
 
 
-_BANNER_PATH = Path(__file__).parent.parent / "banner-circuito.jpg"
+_PROJECT_ROOT = Path(__file__).resolve().parent.parent
+_BANNER_PATH = _PROJECT_ROOT / "banner-circuito.jpg"
 
 
 def render_header() -> None:
     # Banner completo em largura total
     if _BANNER_PATH.exists():
-        st.image(str(_BANNER_PATH), use_container_width=True)
+        banner = Image.open(_BANNER_PATH)
+        st.image(banner, width="stretch")
     else:
         st.markdown(
             '<p class="circuit-title">Circuito dos Shoppings</p>',
