@@ -41,9 +41,9 @@ st.markdown(
         --color-brown-light:   #D4A055;   /* hover âmbar, destaques */
         --color-brown-subtle:  #F5EDE0;   /* fundo âmbar sutil */
 
-        --color-bg:            #F0EAE3;   /* fundo da página — creme da logo */
-        --color-surface:       #FAF5EF;   /* cards e tabelas */
-        --color-surface-alt:   #EAE3DA;   /* zebra, inputs */
+        --color-bg:            #F8F4F1;   /* fundo do banner */
+        --color-surface:       #F8F4F1;   /* cards e tabelas */
+        --color-surface-alt:   #F8F4F1;   /* zebra, inputs */
         --color-border:        #D8D0C4;   /* divisórias */
         --color-border-strong: #C4BAB0;   /* bordas de input */
 
@@ -222,7 +222,7 @@ st.markdown(
         text-transform: uppercase !important;
         letter-spacing: 0.06em !important;
         color: var(--color-text-tertiary) !important;
-        background: var(--color-surface-alt, #EDE8E0) !important;
+        background: var(--color-surface-alt, #F8F4F1) !important;
     }
 
     /* ── Métricas ── */
@@ -392,6 +392,7 @@ else:
             "Os resultados ainda não foram publicados no WCA Live. "
             "Clique em **Atualizar** quando a competição estiver em andamento."
         )
+        st.stop()
 
     st.divider()
 
