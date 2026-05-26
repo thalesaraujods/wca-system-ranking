@@ -25,7 +25,6 @@ query GetCompetitionResults($id: ID!) {
           ranking
           person {
             name
-            wcaId
           }
         }
       }
@@ -39,19 +38,24 @@ CIRCUIT_COMPETITIONS = stages_as_mapping(load_circuit_config())
 
 
 def _build_session() -> requests.Session:
-    retry = Retry(
-        total=3,
-        connect=3,
-        read=3,
-        backoff_factor=0.5,
-        status_forcelist=(429, 500, 502, 503, 504),
-        allowed_methods=("POST",),
-        raise_on_status=False,
-    )
-    adapter = HTTPAdapter(max_retries=retry)
     session = requests.Session()
-    session.mount("https://", adapter)
-    session.mount("http://", adapter)
+    try:
+        retry = Retry(
+            total=3,
+            connect=3,
+            read=3,
+            backoff_factor=0.5,
+            status_forcelist=(429, 500, 502, 503, 504),
+            allowed_methods=frozenset(["POST"]),
+            raise_on_status=False,
+        )
+        adapter = HTTPAdapter(max_retries=retry)
+        session.mount("https://", adapter)
+        session.mount("http://", adapter)
+    except TypeError:
+        # Some hosted environments pin older urllib3 versions. A plain session is
+        # better than failing before the request can be attempted.
+        pass
     return session
 
 
@@ -83,7 +87,7 @@ def fetch_competition(competition_id: str) -> Optional[dict]:
         if data.get("errors"):
             return None
         return data.get("data", {}).get("competition")
-    except (requests.RequestException, ValueError):
+    except Exception:
         return None
 
 
