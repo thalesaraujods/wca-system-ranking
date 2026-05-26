@@ -19,7 +19,7 @@ def render_search_form() -> tuple[str, bool]:
         submitted = st.button(
             "Analisar competição",
             type="primary",
-            use_container_width=True,
+            width="stretch",
             key="btn_analisar",
         )
 
@@ -52,6 +52,6 @@ def render_active_competition_bar(competition_name: str) -> bool:
         return st.button(
             "Nova consulta",
             type="secondary",
-            use_container_width=True,
+            width="stretch",
             key="btn_nova_consulta",
         )

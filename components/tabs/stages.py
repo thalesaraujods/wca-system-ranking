@@ -51,7 +51,7 @@ def _render_stage_summary_cards(
             ranking = build_stage_ranking(df, stage_name)
             st.dataframe(
                 ranking,
-                use_container_width=True,
+                width="stretch",
                 hide_index=True,
                 column_config={
                     "#": st.column_config.NumberColumn(width="small", format="%d"),
@@ -110,7 +110,7 @@ def _render_stage_competitors(df: pd.DataFrame, stage_names: list) -> None:
         )
         st.dataframe(
             detail,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "Nome": st.column_config.TextColumn(width="medium"),
@@ -136,7 +136,7 @@ def _render_stage_competitors(df: pd.DataFrame, stage_names: list) -> None:
 
         st.dataframe(
             summary,
-            use_container_width=True,
+            width="stretch",
             hide_index=True,
             column_config={
                 "#": st.column_config.NumberColumn(width="small", format="%d"),
@@ -190,7 +190,7 @@ def _render_participation_summary(df: pd.DataFrame, stage_names: list) -> None:
 
     st.dataframe(
         summary_df,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         column_config=col_config,
     )

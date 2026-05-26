@@ -1,13 +1,24 @@
 import streamlit as st
 
+from config.circuit import load_circuit_config, stages_as_mapping
 from components.header import render_header
 from components.tabs.export import render_export_tab
 from components.tabs.individual import render_individual_tab
 from components.tabs.ranking import render_ranking_tab
 from components.tabs.rounds import render_rounds_tab
 from components.tabs.stages import render_stages_tab
-from services.wca_api import fetch_all_circuit_stages, CIRCUIT_COMPETITIONS
-from utils.scoring import build_combined_dataframe, build_general_ranking
+from domain.scoring import build_combined_dataframe, build_general_ranking
+from services.wca_api import fetch_all_circuit_stages
+
+
+CIRCUIT_CONFIG = load_circuit_config()
+CIRCUIT_COMPETITIONS = stages_as_mapping(CIRCUIT_CONFIG)
+
+
+@st.cache_data(ttl=300, show_spinner=False)
+def load_circuit_data(competitions: dict[str, str]) -> dict:
+    """Fetch circuit data with a short cache to protect WCA Live and the app."""
+    return fetch_all_circuit_stages(competitions)
 
 # ── Page config ───────────────────────────────────────────────────────────────
 
@@ -320,13 +331,13 @@ if not st.session_state.loaded:
         load_btn = st.button(
             "Carregar resultados do circuito",
             type="primary",
-            use_container_width=True,
+            width="stretch",
             key="btn_load",
         )
 
     if load_btn:
         with st.spinner("Buscando resultados das etapas…"):
-            stages_data = fetch_all_circuit_stages()
+            stages_data = load_circuit_data(CIRCUIT_COMPETITIONS)
 
         # Verifica quais etapas retornaram dados
         stages_meta = {}
@@ -381,6 +392,7 @@ else:
         )
     with col_btn:
         if st.button("Atualizar", type="secondary", key="btn_reload"):
+            load_circuit_data.clear()
             st.session_state.loaded = False
             st.rerun()
 
@@ -416,6 +428,6 @@ else:
         render_export_tab(
             df,
             ranking,
-            "CircuitoDosShoppings",
-            "Ranking — Circuito dos Shoppings",
+            CIRCUIT_CONFIG.slug,
+            CIRCUIT_CONFIG.title,
         )

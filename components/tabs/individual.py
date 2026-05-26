@@ -29,22 +29,30 @@ def render_individual_tab(df: pd.DataFrame, ranking: pd.DataFrame) -> None:
         st.metric(label="Posição Geral", value=position_str)
 
     detail = (
-        df[df["Nome"] == selected][["Evento", "Rodada", "Posição", "TC", "Pontos"]]
-        .sort_values(["Evento", "Rodada"])
+        df[df["Nome"] == selected][
+            ["Etapa", "Evento", "Rodada", "Posição", "TC", "Pontos"]
+            if "Etapa" in df.columns
+            else ["Evento", "Rodada", "Posição", "TC", "Pontos"]
+        ]
+        .sort_values(["Etapa", "Evento", "Rodada"] if "Etapa" in df.columns else ["Evento", "Rodada"])
         .reset_index(drop=True)
     )
 
+    column_config = {
+        "Evento": st.column_config.TextColumn(width="medium"),
+        "Rodada": st.column_config.TextColumn(width="large"),
+        "Posição": st.column_config.NumberColumn(width="small", format="%d"),
+        "TC": st.column_config.NumberColumn(
+            label="Total Competidores", width="small", format="%d"
+        ),
+        "Pontos": st.column_config.NumberColumn(format="%.2f", width="medium"),
+    }
+    if "Etapa" in detail.columns:
+        column_config["Etapa"] = st.column_config.TextColumn(width="medium")
+
     st.dataframe(
         detail,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
-        column_config={
-            "Evento": st.column_config.TextColumn(width="medium"),
-            "Rodada": st.column_config.TextColumn(width="large"),
-            "Posição": st.column_config.NumberColumn(width="small", format="%d"),
-            "TC": st.column_config.NumberColumn(
-                label="Total Competidores", width="small", format="%d"
-            ),
-            "Pontos": st.column_config.NumberColumn(format="%.2f", width="medium"),
-        },
+        column_config=column_config,
     )

@@ -24,6 +24,11 @@ $$Pt = \frac{TC}{P + 1}$$
 | **P** | Posição do competidor na rodada |
 
 O ranking final é a **soma dos pontos** obtidos em todas as rodadas de ambas as etapas.
+Em caso de empate na pontuação total, o sistema usa **ranking denso**:
+competidores empatados recebem a mesma posição e a próxima posição não deixa lacuna.
+
+As etapas do circuito ficam configuradas em [`config/circuit.json`](config/circuit.json),
+permitindo reutilizar a aplicação para outros circuitos sem alterar o código Python.
 
 ---
 
@@ -92,6 +97,12 @@ O app abrirá automaticamente em `http://localhost:8501`.
 wca-sr/
 ├── app.py                         # Entrypoint principal
 ├── requirements.txt               # Dependências Python
+├── config/
+│   ├── circuit.json               # Etapas e metadados do circuito
+│   └── circuit.py                 # Loader tipado da configuração
+├── domain/
+│   ├── models.py                  # Modelos normalizados do domínio
+│   └── scoring.py                 # Fórmula, ranking e transformação dos dados
 ├── banner-circuito.jpg            # Banner do circuito (header)
 ├── logo-circuito.png              # Logo alternativa
 ├── .streamlit/
@@ -106,9 +117,12 @@ wca-sr/
 │       ├── individual.py          # Aba: Individual
 │       └── export.py              # Aba: Exportar
 ├── services/
-│   └── wca_api.py                 # Cliente GraphQL WCA Live
+│   ├── wca_api.py                 # Cliente GraphQL WCA Live
+│   └── exporter.py                # Geração da planilha Excel
 ├── utils/
-│   └── scoring.py                 # Fórmula de pontuação e builders
+│   └── scoring.py                 # Compatibilidade para imports antigos
+├── tests/
+│   └── test_scoring.py            # Testes da regra de pontuação e ranking
 ├── CHANGELOG.md                   # Histórico de versões
 └── README.md                      # Este arquivo
 ```

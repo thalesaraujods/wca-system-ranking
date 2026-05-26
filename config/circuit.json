@@ -1,0 +1,14 @@
+{
+  "slug": "CircuitoDosShoppings",
+  "title": "Ranking — Circuito dos Shoppings",
+  "stages": [
+    {
+      "name": "Etapa Sumaúma",
+      "competition_id": "10694"
+    },
+    {
+      "name": "Etapa Ponta Negra",
+      "competition_id": "10695"
+    }
+  ]
+}

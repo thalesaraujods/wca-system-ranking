@@ -16,7 +16,7 @@ def render_ranking_tab(ranking: pd.DataFrame) -> None:
 
     st.dataframe(
         ranking,
-        use_container_width=True,
+        width="stretch",
         hide_index=True,
         column_config={
             "#": st.column_config.NumberColumn(width="small", format="%d"),
