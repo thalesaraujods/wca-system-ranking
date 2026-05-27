@@ -31,45 +31,44 @@ def render_stages_tab(df: pd.DataFrame, stages_meta: dict) -> None:
 def _render_stage_summary_cards(
     df: pd.DataFrame, stage_names: list, stages_meta: dict
 ) -> None:
-    cols = st.columns(len(stage_names))
+    selected_stage = st.selectbox(
+        label="Etapa do ranking",
+        options=stage_names,
+        key="selectbox_stage_ranking",
+    )
+    comp_name = stages_meta.get(selected_stage) or selected_stage
+    stage_df = df[df["Etapa"] == selected_stage]
 
-    for col, stage_name in zip(cols, stage_names):
-        with col:
-            comp_name = stages_meta.get(stage_name) or stage_name
-            stage_df = df[df["Etapa"] == stage_name]
+    n_competitors = stage_df["Nome"].nunique() if not stage_df.empty else 0
+    n_events = stage_df["Evento"].nunique() if not stage_df.empty else 0
 
-            n_competitors = stage_df["Nome"].nunique() if not stage_df.empty else 0
-            n_events = stage_df["Evento"].nunique() if not stage_df.empty else 0
+    st.caption(f"{comp_name} · {n_competitors} competidores · {n_events} eventos")
 
-            st.markdown(f"**{stage_name}**")
-            st.caption(f"{comp_name} · {n_competitors} competidores · {n_events} eventos")
+    if stage_df.empty:
+        st.info("Resultados ainda não disponíveis.")
+        return
 
-            if stage_df.empty:
-                st.info("Resultados ainda não disponíveis.")
-                continue
-
-            ranking = build_stage_ranking(df, stage_name)
-            st.dataframe(
-                ranking,
-                width="stretch",
-                hide_index=True,
-                column_config={
-                    "#": st.column_config.NumberColumn(width="small", format="%d"),
-                    "Competidor": st.column_config.TextColumn(width="large"),
-                    "Pontos na Etapa": st.column_config.NumberColumn(
-                        format="%.2f", width="medium"
-                    ),
-                },
-            )
+    ranking = build_stage_ranking(df, selected_stage)
+    st.dataframe(
+        ranking,
+        width="stretch",
+        hide_index=True,
+        column_config={
+            "#": st.column_config.NumberColumn(width="small", format="%d"),
+            "Competidor": st.column_config.TextColumn(width="large"),
+            "Pontos na Etapa": st.column_config.NumberColumn(
+                format="%.2f", width="medium"
+            ),
+        },
+    )
 
 
 def _render_stage_competitors(df: pd.DataFrame, stage_names: list) -> None:
     # Seletor de etapa
-    selected_stage = st.radio(
+    selected_stage = st.selectbox(
         label="Etapa",
         options=stage_names,
-        horizontal=True,
-        key="radio_stage_competitors",
+        key="selectbox_stage_competitors",
     )
 
     stage_df = df[df["Etapa"] == selected_stage]
@@ -81,20 +80,16 @@ def _render_stage_competitors(df: pd.DataFrame, stage_names: list) -> None:
     competitors = sorted(stage_df["Nome"].unique())
     n = len(competitors)
 
-    # Linha de controles: filtro + toggle
-    col_search, col_toggle = st.columns([3, 1])
-    with col_search:
-        search = st.selectbox(
-            label="Filtrar competidor",
-            options=["Todos"] + competitors,
-            key="selectbox_stage_competitor_filter",
-        )
-    with col_toggle:
-        show_detail = st.toggle(
-            "Ver por evento",
-            value=False,
-            key="toggle_stage_detail",
-        )
+    search = st.selectbox(
+        label="Filtrar competidor",
+        options=["Todos"] + competitors,
+        key="selectbox_stage_competitor_filter",
+    )
+    show_detail = st.toggle(
+        "Ver por evento",
+        value=False,
+        key="toggle_stage_detail",
+    )
 
     st.caption(f"{n} competidores em {selected_stage}")
 

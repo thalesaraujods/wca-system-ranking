@@ -29,19 +29,17 @@ def render_export_tab(
         unsafe_allow_html=True,
     )
 
-    col_left, col_center, col_right = st.columns([1, 2, 1])
-    with col_center:
-        xlsx_bytes = build_xlsx(df, ranking)
-        filename = f"wca-sr_{competition_id}_{date.today()}.xlsx"
-        st.download_button(
-            label="Baixar planilha (.xlsx)",
-            data=xlsx_bytes,
-            file_name=filename,
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-            type="primary",
-            width="stretch",
-            key="btn_download",
-        )
+    xlsx_bytes = build_xlsx(df, ranking)
+    filename = f"wca-sr_{competition_id}_{date.today()}.xlsx"
+    st.download_button(
+        label="Baixar planilha (.xlsx)",
+        data=xlsx_bytes,
+        file_name=filename,
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        type="primary",
+        width="stretch",
+        key="btn_download",
+    )
 
     st.markdown(
         """

@@ -306,6 +306,78 @@ st.markdown(
         color: var(--color-text-secondary);
         font-size: 0.9375rem;
     }
+
+    @media (max-width: 640px) {
+        [data-testid="stAppViewBlockContainer"],
+        .main .block-container {
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+            padding-top: 1rem !important;
+        }
+
+        .circuit-header { margin: 0.4rem 0 0.75rem; }
+        .circuit-ranking-title {
+            font-size: 1.25rem !important;
+            line-height: 1.25 !important;
+        }
+        .circuit-description {
+            font-size: 0.875rem !important;
+            line-height: 1.45 !important;
+        }
+
+        .stTabs [data-baseweb="tab-list"] {
+            overflow-x: auto !important;
+            overflow-y: hidden !important;
+            flex-wrap: nowrap !important;
+            scrollbar-width: thin;
+        }
+        .stTabs [data-baseweb="tab"] {
+            flex: 0 0 auto !important;
+            min-height: 42px !important;
+            padding: 8px 12px !important;
+            white-space: nowrap !important;
+            font-size: 0.8125rem !important;
+        }
+
+        .stButton > button,
+        .stDownloadButton > button {
+            min-height: 44px !important;
+            width: 100% !important;
+            white-space: normal !important;
+        }
+        .stButton,
+        .stDownloadButton {
+            width: 100% !important;
+        }
+        .element-container:has(.stButton),
+        .element-container:has(.stDownloadButton) {
+            width: 100% !important;
+        }
+
+        [data-testid="metric-container"] {
+            padding: 14px 16px !important;
+            margin-bottom: 0.5rem !important;
+        }
+        [data-testid="stMetricValue"] {
+            font-size: 1.5rem !important;
+        }
+
+        .stDataFrame {
+            margin-top: 0.25rem !important;
+        }
+        .tab-meta {
+            font-size: 0.8rem !important;
+            line-height: 1.35 !important;
+        }
+        .loading-banner {
+            padding: 1.5rem 0.25rem;
+            font-size: 0.875rem;
+        }
+
+        h2, h3 {
+            line-height: 1.2 !important;
+        }
+    }
     </style>
     """,
     unsafe_allow_html=True,
@@ -326,14 +398,12 @@ render_header()
 # ── Carregamento automático das competições ───────────────────────────────────
 
 if not st.session_state.loaded:
-    col_l, col_c, col_r = st.columns([1, 2, 1])
-    with col_c:
-        load_btn = st.button(
-            "Carregar resultados do circuito",
-            type="primary",
-            width="stretch",
-            key="btn_load",
-        )
+    load_btn = st.button(
+        "Carregar resultados do circuito",
+        type="primary",
+        width="stretch",
+        key="btn_load",
+    )
 
     if load_btn:
         with st.spinner("Buscando resultados das etapas…"):
@@ -382,19 +452,16 @@ else:
     stages_meta = st.session_state.stages_meta
 
     # Barra de status + botão de atualizar
-    col_info, col_btn = st.columns([5, 1])
-    with col_info:
-        etapas_carregadas = [k for k, v in stages_meta.items() if v is not None]
-        st.markdown(
-            f'<p class="tab-meta">Circuito carregado · '
-            f'{" e ".join(etapas_carregadas)}</p>',
-            unsafe_allow_html=True,
-        )
-    with col_btn:
-        if st.button("Atualizar", type="secondary", key="btn_reload"):
-            load_circuit_data.clear()
-            st.session_state.loaded = False
-            st.rerun()
+    etapas_carregadas = [k for k, v in stages_meta.items() if v is not None]
+    st.markdown(
+        f'<p class="tab-meta">Circuito carregado · '
+        f'{" e ".join(etapas_carregadas)}</p>',
+        unsafe_allow_html=True,
+    )
+    if st.button("Atualizar", type="secondary", key="btn_reload"):
+        load_circuit_data.clear()
+        st.session_state.loaded = False
+        st.rerun()
 
     # Banner quando resultados ainda não foram publicados
     if df is None or df.empty:
@@ -409,7 +476,7 @@ else:
     st.divider()
 
     tab_ranking, tab_stages, tab_rounds, tab_individual, tab_export = st.tabs(
-        ["Ranking Geral", "Por Etapa", "Por Rodada", "Individual", "Exportar"]
+        ["Geral", "Etapas", "Rodadas", "Atleta", "Excel"]
     )
 
     with tab_ranking:
